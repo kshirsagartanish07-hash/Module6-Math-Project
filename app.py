@@ -134,11 +134,25 @@ hr {
 }
 
 /* Responsive spacing on small screens */
+/* Keep the in-page navigation comfortable to tap on phones */
+div[role="radiogroup"] {
+    gap: 0.5rem;
+}
+
+div[role="radiogroup"] label {
+    min-height: 2.75rem;
+    align-items: center;
+}
+
 @media (max-width: 768px) {
     .block-container {
         padding-top: 1rem;
         padding-left: 1rem;
         padding-right: 1rem;
+    }
+
+    div[role="radiogroup"] {
+        flex-wrap: wrap;
     }
 }
 </style>
@@ -152,22 +166,53 @@ st.caption(
     "Interactive Mini Project"
 )
 
+# This navigation stays in the main page, so mobile users do not need
+# to discover or open Streamlit's collapsed sidebar to change sections.
+st.radio(
+    "Navigate to a section",
+    PROJECT_OPTIONS,
+    key="main_project",
+    horizontal=True,
+    on_change=_sync_from_main
+)
+
+project = st.session_state["main_project"]
+
 st.markdown("""
 This application demonstrates Bayesian probability and statistical
 moment analysis using network security and network latency examples.
 """)
 
-# ---------------- SIDEBAR ----------------
+# ---------------- RESPONSIVE PROJECT NAVIGATION ----------------
+
+PROJECT_OPTIONS = [
+    "Home",
+    "Bayesian Intrusion Detection",
+    "Network Latency Analysis"
+]
+
+# Keep the desktop sidebar and the always-visible page navigation in sync.
+if "sidebar_project" not in st.session_state:
+    st.session_state["sidebar_project"] = "Home"
+if "main_project" not in st.session_state:
+    st.session_state["main_project"] = "Home"
+
+
+def _sync_from_sidebar():
+    st.session_state["main_project"] = st.session_state["sidebar_project"]
+
+
+def _sync_from_main():
+    st.session_state["sidebar_project"] = st.session_state["main_project"]
+
 
 st.sidebar.title("Project Navigation")
 
-project = st.sidebar.radio(
+st.sidebar.radio(
     "Choose a mini-project",
-    [
-        "Home",
-        "Bayesian Intrusion Detection",
-        "Network Latency Analysis"
-    ]
+    PROJECT_OPTIONS,
+    key="sidebar_project",
+    on_change=_sync_from_sidebar
 )
 
 st.sidebar.markdown("---")
